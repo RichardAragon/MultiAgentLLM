@@ -1,0 +1,49 @@
+# This script demonstrates how to use a multi-LLM agent framework to perform complex tasks that involve external tools
+# The framework consists of three components: a planner, a caller, and a summarizer
+# Each component is implemented by a single LLM that is fine-tuned on a specific sub-task
+# The framework is based on the approach outlined in the paper "Small LLMs Are Weak Tool Learners: A Multi-LLM Agent" [^1^][1]
+
+# Import the necessary libraries
+import requests
+import json
+import numpy as np
+
+# Define the task and the tools
+task = "Find the best restaurant near me based on the ratings and reviews"
+tools = ["Google Maps API", "Yelp API", "Sentiment Analysis API"]
+
+# Initialize the planner, the caller, and the summarizer
+# The planner is responsible for generating a plan of action, such as which tools to use and in what order
+# The caller is responsible for invoking the tools and parsing the results
+# The summarizer is responsible for generating a concise and informative summary of the final outcome
+planner = LLM("planner")
+caller = LLM("caller")
+summarizer = LLM("summarizer")
+
+# Fine-tune the LLMs on the respective sub-tasks using a two-stage training paradigm
+# First, fine-tune a backbone LLM on the entire dataset without discriminating sub-tasks
+# Second, use the fine-tuned LLM to instantiate the planner, caller, and summarizer respectively
+# Continually fine-tune them on respective sub-tasks
+backbone = LLM("backbone")
+backbone.fine_tune(dataset)
+planner.copy_from(backbone)
+caller.copy_from(backbone)
+summarizer.copy_from(backbone)
+planner.continue_fine_tune(planner_dataset)
+caller.continue_fine_tune(caller_dataset)
+summarizer.continue_fine_tune(summarizer_dataset)
+
+# Generate a plan of action using the planner
+plan = planner.generate_plan(task, tools)
+print(f"Plan: {plan}")
+
+# Execute the plan using the caller
+results = []
+for tool in plan:
+    result = caller.invoke_tool(tool, task)
+    results.append(result)
+    print(f"Result from {tool}: {result}")
+
+# Generate a summary using the summarizer
+summary = summarizer.generate_summary(results, task)
+print(f"Summary: {summary}")
