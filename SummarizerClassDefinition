@@ -1,0 +1,21 @@
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+import torch
+
+class Summarizer():
+    def __init__(self, model="facebook/bart-base"):
+        self.tokenizer = AutoTokenizer.from_pretrained(model)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(model)
+
+    def generate_summary(self, results, task):
+        """Generates a summary from the results obtained through multiple queries."""
+        tokens_tensor = self.tokenizer([task]+results, padding=True, truncation=True, max_length=4096, return_tensors="pt").input_ids
+        summaries = []
+        for i in range(0, len(tokens_tensor[0]), 512):
+          input_seq = torch.tensor(tokens_tensor[0][i:i+512]).unsqueeze(0)
+          output = self.model.generate(input_seq, min_length=32, max_length=min(256, tokens_tensor[0].shape[0] - i), num_beams=8)
+          summary = self.tokenizer.decode(output[0])
+          summaries.append(summary)
+
+        total_summary = "<br><br>".join(summaries)
+        full_summary = f"""Task: {task}<br>{total_summary}"""
+        return full_summary
