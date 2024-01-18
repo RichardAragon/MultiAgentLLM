@@ -1,0 +1,27 @@
+SUMMARIZER_TOOLBENCH = {
+    "history": "Conversation history: {history}",
+    "instructions": "Formulate a concise summary based on the provided conversation history:",
+    "methods": [{"name": "create_summary", "description": "Create a concise summary."}],
+}
+
+class CSUMMARIZER:
+    def __init__(self):
+        pass
+
+    def extract_critical_details(self, history):
+        # Implement content extraction and analysis here.
+        important_points = analyze_conversation_history(history)
+        return important_points
+
+    def compile_summary(self, extracted_information):
+        # Implement summary compilation logic here.
+        compiled_summary = format_summary(extracted_information)
+        return compiled_summary
+
+    def create_summary(self, history):
+        important_info = self.extract_critical_details(history)
+        final_summary = self.compile_summary(important_info)
+        return final_summary
+
+    def list_available_methods(self):
+        return [method["name"] for method in SUMMARIZER_TOOLBENCH["methods"]]
