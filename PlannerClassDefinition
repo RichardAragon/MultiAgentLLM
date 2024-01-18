@@ -1,0 +1,21 @@
+class Planner(object):
+    def __init__(self, model="TinyLlama/TinyLlama-1.1B-Chat-v1.0"):
+        self.model = ModelWrapper(model=model)  # Replace with your actual model wrapper or library import
+        
+    def _get_relevant_tools(self, task):
+        """Return the subset of relevant tools for the given task."""
+        if "restaurant" in task and "ratings" in task and "reviews" in task:
+            return {"Google Maps API", "Yelp API"}
+        else:
+            raise ValueError(f"Task '{task}' does not match any known tasks.")
+            
+    def _rank_tools(self, tools):
+        """Rank the tools according to some heuristic criteria."""
+        # For simplicity, we rank the tools arbitrarily here. You might want to replace this logic with something more sophisticated.
+        ranking = {"Google Maps API": 1, "Yelp API": 2}
+        return sorted(tools, key=lambda x: ranking[x])
+    
+    def generate_plan(self, task, all_tools=None):
+        """Generate a plan consisting of appropriate tools to achieve the given task."""
+        if all_tools is None:
+            all_tools = TOOLS </s>
