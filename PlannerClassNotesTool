@@ -1,0 +1,36 @@
+class Planner(object):
+    def __init__(self):
+        self.filename = 'notes.txt'
+
+    def read_notes(self):
+      with open(self.filename, 'r') as file:
+        notes = file.read()
+      return notes
+
+    def write_note(self, text):
+      with open(self.filename, 'a') as file:
+        file.write(text + '\n')
+
+    def generate_prompt(self, user_input):
+      if "read your notes" in user_input:
+        notes = self.read_notes()
+        prompt = f"Here are your notes:\n{notes}\n{user_input}"
+      elif "write this as a note:" in user_input:
+        note_text = user_input.split(":")[1].strip()
+        self.write_note(note_text)
+        prompt = f"Note saved: {note_text}"
+      else:
+        prompt = user_input
+      return prompt
+
+    def write_to_notes(self, prompt):
+        if "write this to your notes" in prompt:
+            try:
+                # Open the file in append mode
+                with open(self.filename, 'a') as f:
+                    # Extract the text to write from the prompt
+                    note_text = prompt.split("write this to your notes")[-1].strip()
+                    f.write(note_text + "\n")  # Add a newline character for better formatting
+                print("Note successfully written to notes.txt")
+            except Exception as e:
+                print("Error writing to notes file:", e)
