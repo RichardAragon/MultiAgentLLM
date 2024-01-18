@@ -1,0 +1,52 @@
+import os
+import requests
+import yelp_api  # Assuming that you have installed yelp-fusion via pip install yelp-fusion
+
+TOOLS = {"Google Maps API": google_maps_call, "Yelp API": yelp_call, "Sentiment Analysis API": sentiment_analysis_call}
+
+def google_maps_call(query):
+    """Placeholder for calling the Google Maps API."""
+    api_key = os.environ["GOOGLE_MAPS_API_KEY"]  # Provide your own API key
+    url = f"https://maps.googleapis.com/maps/api/place/textsearch/json?query={query}&key={api_key}"
+    response = requests.get(url)
+    data = response.json()
+    return data
+
+def yelp_call(business_name):
+    """Placeholder for calling the Yelp Fusion API."""
+    client = yelp_api.FusionApiClient(os.environ["YELP_API_KEY"])  # Provide your own API key
+    search_request = yelp_api.SearchRequest(term=business_name, limit=5)
+    response = client.search_businesses(search_request)
+    businesses = response.businesses
+    return businesses
+
+def sentiment_analysis_call(review):
+    """Placeholder for calling the Sentiment Analysis API."""
+    # Provide your own endpoint URL and payload for the API call below
+    url = "http://example.com/sentiment_analyzer"
+    headers = {'Content-type': 'application/json'}
+    payload = {'content': review}
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    score = response.json()['score']
+    return score
+
+class Caller(object):
+    def __init__(self, model="TinyLlama/TinyLlama-1.1B-Chat-v1.0"):
+        self.model = ModelWrapper(model=model)  # Replace with your actual model wrapper or library import
+        
+    def invoke_tool(self, tool, task):
+        """Invoke the specified tool with its parameters derived from the input task."""
+        try:
+            func = TOOLS[tool]
+        except KeyError:
+            raise ValueError(f"Unknown tool '{tool}', please select from the following options: {list(TOOLS)}")
+
+        params = self._parse_parameters(func.__code__.co_varnames, task)
+        result = func(*params)
+        return result
+    
+    @staticmethod
+    def _parse_parameters(param_names, task):
+        """Parse the task string into parameter values corresponding to the provided parameter names."""
+        args = dict(zip(param_names[:len(param_names)-1], param_names[-1].split(task)))
+        return tuple(args.values())
