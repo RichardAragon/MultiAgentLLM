@@ -1,0 +1,36 @@
+CALLER_TOOLBENCH = {
+    "apidocs": "Here are the available APIs: {doc}",
+    "history": "Conversation history: {history}",
+    "thought": "Your thought for this step is: {thought}",
+    "action_separator": ": ",
+    "field_separator": " ",
+    "action_format": "Action: {}, Action Input: {}",
+    "tool_names": tool_names,
+    "actions": [
+        {
+            "name": "make_api_call",
+            "description": 'Make an API call',
+            "executor": lambda doc, history, thought, **kwargs: CAller().make_api_call(doc, history, thought, kwargs),
+        }
+    ],
+}
+
+class Caller:
+    def __init__(self):
+        pass
+
+    def make_api_call(self, doc, history, thought, **kwargs):
+        action = kwargs["action"]
+        input_data = kwargs["input_data"]
+        return {"plan": f"Make API call ({action}) with provided input.", "followup": "present_response"}
+
+    def list_possible_actions(self):
+        return [act["name"] for act in CALLER_TOOLBENCH["actions"]]
+
+    def construct_call_template(self, action, input_data):
+        template = CALLER_TOOLBENCH["action_format"].format(action, input_data)
+        return template
+
+    def present_response(self, action_call):
+        formatted_response = CALLER_TOOLBENCH["action_separator"].join(action_call.split("\n"))
+        return formatted_response
