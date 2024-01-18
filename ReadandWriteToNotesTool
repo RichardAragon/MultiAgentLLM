@@ -1,0 +1,7 @@
+my_planner = Planner()
+
+user_prompt = input("write this to your notes: ")
+my_planner.write_to_notes(user_prompt)
+
+notess = my_planner.read_notes()
+print("Notes: \n" + notess)
