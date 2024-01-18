@@ -63,7 +63,89 @@ Global-to-Local Progressive Fine-Tuning Strategy
 
 We propose a novel two-stage fine-tuning technique – Global-to-Local Progressive Fine-Tuning (GLPFT) – applied to α-UMi framework modules. GLPFT ensures effective fine-tuning adapted to specific roles. Initially, a shared base LLM experiences global fine-tuning on generic large datasets. Following this, specializations occur during local fine-tuning, fine-tuning subsets aligned with the roles and duties assumed by the dedicated modules. Additional details concerning data organization and prompt adaptation appear in Appendex A.
 
-![Fig2](images/fig2.png)
+Here are the steps to create the global fine-tuning dataset for training the backbone LLM:
+
+1. Collect execution trajectories: Gather historical conversations with sequences of rationale, actions, observations, and answers. 
+
+2. Keep trajectories intact: Do not break down or segment the trajectories. Keep each trajectory as one long sequence.
+
+3. Format each trajectory:
+
+<s> User instruction </s>
+
+Rationale 1: [Text]
+Action 1: [Text] 
+Observation 1: [Text]
+
+Rationale 2: [Text]
+Action 2: [Text]
+Observation 2: [Text]
+
+...
+
+Answer: [Text]
+
+4. Duplicate user instructions: Have multiple trajectories for the same user instruction, but with different action sequences and answers. 
+
+5. Prompts: Use a simple prompt that provides the user instruction and asks the model to generate the rationale, action, observation, answer sequence.
+
+6. Target output: The entire trajectory sequence from rationale 1 to final answer.
+
+So in summary - keep full trajectories together as one long target text, have multiple variants per user instruction, and do not differentiate between sub-tasks at this stage. Let me know if you need any other details!
+
+ 
+Here is a methodology you can follow to create the training data needed for the Planner agent, based on the approach outlined in the research paper:
+
+1. Collect execution trajectories: Gather a set of historical conversations where tools were used to solve problems. These trajectories should show the full sequence of rationale, actions, observations, and answers.
+
+2. Segment trajectories: Break down each execution trajectory into individual steps. Extract the rationale, action, observation, and answer for each step.
+
+3. Global fine-tuning data: For the first stage of training, do not differentiate between sub-tasks. Keep the rationale, action, and answer together in sequence for each step. This data will be used for global fine-tuning of the backbone LLM to give it a comprehensive understanding.
+
+4. Local fine-tuning data (Planner): For the second stage of training, extract only the rationale from each step. The format should be:
+
+<s> Previous trajectory </s>
+Rationale: [Planner rationale]
+Next: Caller/Summarizer/Give up
+
+5. Duplicate training instructions: Re-use the same training instructions from the global fine-tuning stage. But change the format of the target output to be rationale-only.
+
+6. Tailor prompts: Use a prompt for the Planner that focuses its task on generating the next rationale and high-level plan, as outlined in Appendix A.1 in the paper. 
+
+ Here is an example row from the global fine-tuning dataset:
+
+<s> Book me a flight from New York to Los Angeles next Tuesday </s>
+
+Rationale 1: We need to first check flight availability between the given cities on the requested date before booking.
+
+Action 1: invoke_api_flight_search 
+Observation 1: { "flights": [{"airline": "Delta", "departure_time": "9:00am", "arrival_time": "12:00pm"}, {"airline": "United ", "departure_time": "10:30am", "arrival_time": "1:30pm"}]}
+
+Rationale 2: There are two flight options on Tuesday from New York to Los Angeles. Let's select the cheaper Delta flight that departs at 9am and arrives at noon. 
+
+Action 2: invoke_api_flight_booking
+Observation 2: {"booking_confirmed": true, "pnr": "ABC123"}
+
+Answer: I have successfully booked you on the 9am Delta flight from New York to Los Angeles next Tuesday. Your booking reference number is ABC123. Please let me know if you need any other details about your flight.
+
+So in this example, the full trajectory from the initial user query to the final flight booking is kept intact as one sequence, which the model will be trained to generate end-to-end. 
+ Here is an example training set row for fine-tuning the Planner specifically:
+
+<s> Book me the cheapest flight from San Francisco to Seattle tomorrow </s>
+
+Rationale 1: We first need to check flight prices for the given route to find the cheapest option.
+Next: Caller
+
+Rationale 2: The Delta flight for $200 seems to be the cheapest choice. Let's book that.  
+Next: Caller
+
+Rationale 3: Booking confirmed. We have completed the user request.
+Next: Summarizer
+
+In this example, only the rationales from the Planner are kept as the target text. The actions, observations, and answers are removed. The format is updated to have the "Next: Caller/Summarizer" appended to each rationale. And the prompt provides some context about the user's flight booking request.
+
+This structures the data specifically for fine-tuning the Planner's ability to generate helpful rationales and decide the next high-level step. 
+
 
 References
 ----------
