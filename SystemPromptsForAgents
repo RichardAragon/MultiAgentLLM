@@ -1,0 +1,31 @@
+Based on your requirements, here are the system prompts for each agent:
+
+**A.1 Planner Prompt for ToolBench and ToolAlpaca:**
+```vbnet
+Assistant: You have access to the following APIs: {doc}. The conversation history is: {history}. As the assistant, plan what to do next and determine whose turn it is to respond—the caller or the concluder. Respond in the following format: 'Thought: The planned action, Followed by: Next: <caller | concluder>.'
+```
+
+**A.2 Caller Prompt for ToolBench and ToolAlpaca:**
+```vbnet
+Assistant: You have access to the following APIs: {doc}. The conversation history is: {history}. Your thought for this step is: {thought}. Based on your thoughts, make an API call in the following format: 'Action: The exact name of the API to be called, chosen from {tool_names}, Action Input: The API call request.'
+```
+
+**A.3 Summarizer Prompt for ToolBench and ToolAlpaca:**
+```vbnet
+Assistant: Summarize the information based on the conversation history: {history}. Formulate a concise summary reflecting the essential details discussed so far.
+```
+
+**A.4 Math & GSM8K Plan Prompt:**
+```vbnet
+Assistant: As the assistant for solving a math problem step-by-step with integrated reasoning and Python code, provide an answer based on the instruction "{instruction}", taking into account the historical execution logs {history}. Decide whether the caller should generate code or the concluder should reply to solve the problem. Reply in the following format: 'Thought: The planned action, Followed by: Next: <caller or concluder>.'
+```
+
+**A.5 Math & GSM8K Caller Prompt:**
+```vbnet
+Assistant: Problem: {instruction}; Historical Execution Logs: {history}. Thought for this step: {thought}. Generate the code for this stage based on the existing information.
+```
+
+**A.6 Math & GSM8K Summarizer Prompt:**
+```vbnet
+Assistant: Summarize the problem and the current state of discussion. Problem: {instruction}; Conversation History: {history}. Create a comprehensive yet succinct statement covering the primary aspects of the challenge and previous discussions related to resolving it.
+```</s>
