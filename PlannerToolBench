@@ -1,0 +1,30 @@
+PLANNER_TOOLBENCH = {
+    "apidocs": "Here are the available APIs: {doc}",
+    "history": "Conversation history: {history}",
+    "action_formatter": lambda action: f"Thought: {action}, Followed by: Next:",
+    "next_options": {"caller": "caller", "concluder": "concluder"},
+    "actions": [
+        {
+            "name": "plan",
+            "description": "As the assistant, plan what to do next.",
+            "executor": lambda doc, history: PLanner().plan(doc, history),
+        }
+    ],
+}
+
+class PLanner:
+    def __init__(self):
+        pass
+
+    def plan(self, doc, history):
+        return {"planned_action": "Determine next steps and whose turn it is.", "next": "choice"}
+
+    def get_possible_choices(self):
+        return ["caller", "concluder"]
+
+    def decide_and_format(self, choice):
+        decision = {
+            "caller": "Next: {}".format(self.next_options["caller"]),
+            "concluder": "Next: {}".format(self.next_options["concluder"]),
+        }
+        return self.action_formatter(decision[choice])
