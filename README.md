@@ -1,5 +1,9 @@
 Multi Agent Language Learning Machine (Multi Agent LLM)
 ---
+(Update) 1/20/2024: Global Fine Tuned Phi Model Located Here: https://huggingface.co/TuringsSolutions/PhiGlobalFineTunedAgent
+
+I can complete the second fine tunes for the individual agent actors (Planner, Caller, Observer). I cannot complete the fine tuning process and upload the completed models to HuggingFace due to compute limits. I need more GPUs :( 
+
 (Update) 1/19/2024: All datasets available at HuggingFace Repo: https://huggingface.co/TuringsSolutions 
 
 
